@@ -11,7 +11,8 @@ import os
 # ---- ----
 
 def create_director(path_to_create_dirs, name):
-    dir_name = f'{path_to_create_dirs}/{name}'
+
+    dir_name = os.path.join(path_to_create_dirs, name)
 
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
@@ -19,10 +20,7 @@ def create_director(path_to_create_dirs, name):
     else:
         print(f'The dir.{dir_name} already exists.')
         exit(-1)
-
-
-def create_file(path_to_create_file, name):
-    pass
+    return dir_name
 
 
 if __name__ == '__main__':
@@ -48,14 +46,20 @@ if __name__ == '__main__':
         if re.match(regex, url['href']):
             # print(url['href'])
             name_of_dir = url.string
-            create_director(path_to_create_dirs, name_of_dir)
+            target_dir = create_director(path_to_create_dirs, name_of_dir)
 
             go_to_link_lab = requests.get(f"https://sites.google.com{url['href']}")
             laborator = bs(go_to_link_lab.content, 'html.parser')
             list_of_problems = laborator.find('ol')
-            if list_of_problems:
-                list_of_problems = list_of_problems.findAll('li')
-                for problem in list_of_problems:
-                    pass
-                    # print(problem.string)
+
+            with open(os.path.join(target_dir, f'lab{target_dir[-1]}.py'), "w") as file_lab:
+                if list_of_problems:
+                    list_of_problems = list_of_problems.findAll('li')
+                    nr_pb = 1
+                    for problem in list_of_problems:
+                        print(problem.string)
+                        if problem.string:
+                            string_hardcoded = f"\n def ex{nr_pb}():\n  pass \n"
+                            file_lab.write(string_hardcoded)
+                        nr_pb += 1
             # break
