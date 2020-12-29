@@ -1,4 +1,4 @@
-def ex1(param): 
+def process_item(param): 
 	pass
 
 def my_function(param): 
@@ -22,6 +22,6 @@ def sum_digits(param):
 def multiply_by_two(param): 
 	pass
 
-def ex9(param): 
+def f9(param): 
 	pass
 

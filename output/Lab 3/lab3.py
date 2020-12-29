@@ -7,10 +7,10 @@ def ex2(param):
 def ex3(param): 
 	pass
 
-def ex4(param): 
+def build_element(param): 
 	pass
 
-def ex5(param): 
+def validate_dict(param): 
 	pass
 
 def ex6(param): 
