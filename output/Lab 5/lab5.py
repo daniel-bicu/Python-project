@@ -1,27 +1,27 @@
-def ex1(): 
+def ex1(param): 
 	pass
 
-def ex2(): 
+def my_function(param): 
 	pass
 
-def ex3(): 
+def ex3(param): 
 	pass
 
-def ex4(): 
+def my_function(param): 
 	pass
 
-def ex5(): 
+def my_function(param): 
 	pass
 
-def ex6(): 
+def my_function(param): 
 	pass
 
-def ex7(): 
+def sum_digits(param): 
 	pass
 
-def ex8(): 
+def multiply_by_two(param): 
 	pass
 
-def ex9(): 
+def ex9(param): 
 	pass
 

@@ -1,36 +1,36 @@
-def ex1(): 
+def ex1(param): 
 	pass
 
-def ex2(): 
+def ex2(param): 
 	pass
 
-def ex3(): 
+def ex3(param): 
 	pass
 
-def ex4(): 
+def compose(param): 
 	pass
 
-def ex5(): 
+def ex5(param): 
 	pass
 
-def ex6(): 
+def ex6(param): 
 	pass
 
-def ex7(): 
+def ex7(param): 
 	pass
 
-def ex8(): 
+def ex8(param): 
 	pass
 
-def ex9(): 
+def ex9(param): 
 	pass
 
-def ex10(): 
+def len(param): 
 	pass
 
-def ex11(): 
+def ex11(param): 
 	pass
 
-def ex12(): 
+def group_by_rhyme(param): 
 	pass
 

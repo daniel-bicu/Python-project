@@ -22,6 +22,24 @@ def create_director(path_to_create_dirs, name):
     return dir_name
 
 
+def detect_name_function(text):
+    pattern1 = re.compile(r'([a-z]+)([_a-z]+)*(\(.*\))+')
+    #pattern2 = re.compile(r'([a-z]+)([_a-z]+)([\s]+function)')
+    nume_fct = pattern1.search(text)
+
+    name = ''
+    if nume_fct:
+        name += nume_fct.group(1)
+        name += nume_fct.group(2) if nume_fct.group(2) else ''
+    else:
+        #nume_fct = pattern2.search(text)
+        if nume_fct:
+            name += nume_fct.group(1)
+            name += nume_fct.group(2) if nume_fct.group(2) else ''
+
+    return name if name != '' else -1
+
+
 # --- REGEXP ----
 url_regex = re.compile('^/site/fiipythonprogramming/laboratories/lab-')
 labs_regex = re.compile(r'^Lab|lab')
@@ -40,7 +58,6 @@ if __name__ == '__main__':
 
     all_links = bs_page_obj.findAll('a')
 
-    print(all_links[3].text)
     link_labs = [link['href'] for link in all_links if labs_regex.match(str(link.text))][0]
 
     # print(link_labs)
@@ -97,7 +114,6 @@ if __name__ == '__main__':
                         #                     if len(str(pb.text)) and re.match(r'(\s*)(\d{1,2}[\.|\)]{1}).', pb.text) or
                         #                     re.match(r'^(\s*)(Example|example|Ex)', pb.text)]
                         problems.append(problema)
-                        #print(problems)
                         list_of_problems = problems
 
                     nr_pb = 1
@@ -106,9 +122,14 @@ if __name__ == '__main__':
                             text = problem
                         else:
                             text = problem.text
-                        print(text)
-                        if text:
-                            string_hardcoded = f"def ex{nr_pb}(): \n\tpass\n\n"
+                        #print(text)
+                        probably_name = detect_name_function(text)
+
+                        if  probably_name != -1:
+                            string_hardcoded = f"def {probably_name}(param): \n\tpass\n\n"
+                            file_lab.write(string_hardcoded)
+                        else:
+                            string_hardcoded = f"def ex{nr_pb}(param): \n\tpass\n\n"
                             file_lab.write(string_hardcoded)
                         nr_pb += 1
             # break
