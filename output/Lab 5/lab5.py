@@ -16,10 +16,10 @@ def my_function(param):
 def my_function(param): 
 	pass
 
-def sum_digits(param): 
+def process(param): 
 	pass
 
-def multiply_by_two(param): 
+def print_arguments(param): 
 	pass
 
 def f9(param): 

@@ -14,14 +14,26 @@ import utils
 # ---- ----
 
 def detect_name_function(text):
-    nume_fct = regex.pattern_function_1.search(text)
+    pattern3 = False
+    nume_fct = regex.pattern_function_3.search(text)
 
     name = ''
+
+    if nume_fct:
+        pattern3 = True
+
+    if nume_fct is None:
+        nume_fct = regex.pattern_function_1.search(text)
+
     if nume_fct is None:
         nume_fct = regex.pattern_function_2.search(text)
 
-    if nume_fct:
+    if nume_fct and pattern3 is False:
         name = re.split('\s|\s\(|\(|[\s]function', nume_fct.group(0))[0]
+    else:
+        if nume_fct and pattern3:
+            name = nume_fct.group(2)
+
     return name if name != '' else -1
 
 
