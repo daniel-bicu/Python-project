@@ -66,47 +66,50 @@ if __name__ == '__main__':
             else:
                 paragraphs_pb = False
 
-            print("Director NOU")
+            try:
+                with open(os.path.join(target_dir, f'lab{target_dir[-1]}.py'), "w") as file_lab:
+                    if list_of_problems:
+                        if paragraphs_pb is False:
+                            list_of_problems = list_of_problems.findAll('li')
+                        else:
+                            problema = ''
+                            start_of_pb = 1
+                            problems = []
+                            for pb in list_of_problems:
 
-            with open(os.path.join(target_dir, f'lab{target_dir[-1]}.py'), "w") as file_lab:
-                if list_of_problems:
-                    if paragraphs_pb is False:
-                        list_of_problems = list_of_problems.findAll('li')
-                    else:
-                        problema = ''
-                        start_of_pb = 1
-                        problems = []
-                        for pb in list_of_problems:
-
-                            if regex.start_problem_pattern.match(pb.text):
-                                if start_of_pb == 1:
-                                    problema += pb.text
+                                if regex.start_problem_pattern.match(pb.text):
+                                    if start_of_pb == 1:
+                                        problema += pb.text
+                                    else:
+                                        problems.append(problema)
+                                        problema = pb.text
+                                        start_of_pb = 1
+                                    start_of_pb = 0
                                 else:
-                                    problems.append(problema)
-                                    problema = pb.text
-                                    start_of_pb = 1
-                                start_of_pb = 0
+
+                                    problema += pb.text
+
+                            problems.append(problema)
+                            list_of_problems = problems
+
+                        nr_pb = 1
+                        for problem in list_of_problems:
+                            if paragraphs_pb:
+                                text = problem
                             else:
+                                text = problem.text
+                            # print(text)
+                            probably_name = detect_name_function(text)
 
-                                problema += pb.text
-
-                        problems.append(problema)
-                        list_of_problems = problems
-
-                    nr_pb = 1
-                    for problem in list_of_problems:
-                        if paragraphs_pb:
-                            text = problem
-                        else:
-                            text = problem.text
-                        # print(text)
-                        probably_name = detect_name_function(text)
-
-                        if probably_name != -1:
-                            string_hardcoded = f"def {probably_name}(param): \n\tpass\n\n"
-                            file_lab.write(string_hardcoded)
-                        else:
-                            string_hardcoded = f"def ex{nr_pb}(param): \n\tpass\n\n"
-                            file_lab.write(string_hardcoded)
-                        nr_pb += 1
+                            if probably_name != -1:
+                                string_hardcoded = f"def {probably_name}(param): \n\tpass\n\n"
+                                file_lab.write(string_hardcoded)
+                            else:
+                                string_hardcoded = f"def ex{nr_pb}(param): \n\tpass\n\n"
+                                file_lab.write(string_hardcoded)
+                            nr_pb += 1
+            except:
+                print("Unable to create this file.\n")
+            else:
+                print("File was created successfully!")
             # break
