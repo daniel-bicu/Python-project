@@ -7,7 +7,7 @@ def ex2(param):
 def ex3(param): 
 	pass
 
-def build_element(param): 
+def build_xml_element(param): 
 	pass
 
 def validate_dict(param): 

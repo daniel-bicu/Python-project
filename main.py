@@ -23,20 +23,16 @@ def create_director(path_to_create_dirs, name):
 
 
 def detect_name_function(text):
-    pattern1 = re.compile(r'([a-z]+)([_a-z0-9]+)*(\(.*\))+')
-    pattern2 = re.compile(r'([a-z]+)(_[a-z0-9]+)+([\s]+function)')
+    pattern1 = re.compile(r'([a-z]+[0-9]*)(_[a-z0-9]+)*(\([^\)]*\)){1}')
+    pattern2 = re.compile(r'([a-z]+[0-9]*)(_[a-z0-9]+)+([\s]+function){1}')
     nume_fct = pattern1.search(text)
 
     name = ''
-    if nume_fct:
-        name += nume_fct.group(1)
-        name += nume_fct.group(2) if nume_fct.group(2) else ''
-    else:
+    if nume_fct is None:
         nume_fct = pattern2.search(text)
-        if nume_fct:
-            name += nume_fct.group(1)
-            name += nume_fct.group(2) if nume_fct.group(2) else ''
 
+    if nume_fct:
+        name = re.split('\s|\s\(|\(|[\s]function', nume_fct.group(0))[0]
     return name if name != '' else -1
 
 
