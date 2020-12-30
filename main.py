@@ -1,45 +1,30 @@
 # ---- IMPORTS ----
 
-import requests
-import bs4
-from bs4 import BeautifulSoup as bs
+import os
 import re
 import sys
-import os
+
+import requests
+from bs4 import BeautifulSoup as bs
+
+import regexs_utils as regex
+import utils
 
 
 # ---- ----
 
-def create_director(path_to_create_dirs, name):
-    dir_name = os.path.join(path_to_create_dirs, name)
-
-    if not os.path.exists(dir_name):
-        os.mkdir(dir_name)
-        print(f'Director {dir_name} created successfully.')
-    # else:
-    #     print(f'The dir.{dir_name} already exists.')
-    #     exit(-1)
-    return dir_name
-
-
 def detect_name_function(text):
-    pattern1 = re.compile(r'([a-z]+[0-9]*)(_[a-z0-9]+)*(\([^\)]*\)){1}')
-    pattern2 = re.compile(r'([a-z]+[0-9]*)(_[a-z0-9]+)+([\s]+function){1}')
-    nume_fct = pattern1.search(text)
+    nume_fct = regex.pattern_function_1.search(text)
 
     name = ''
     if nume_fct is None:
-        nume_fct = pattern2.search(text)
+        nume_fct = regex.pattern_function_2.search(text)
 
     if nume_fct:
         name = re.split('\s|\s\(|\(|[\s]function', nume_fct.group(0))[0]
     return name if name != '' else -1
 
 
-# --- REGEXP ----
-url_regex = re.compile('^/site/fiipythonprogramming/laboratories/lab-')
-labs_regex = re.compile(r'^Lab|lab')
-# ---  ----
 paragraphs_pb = False
 
 if __name__ == '__main__':
@@ -54,7 +39,7 @@ if __name__ == '__main__':
 
     all_links = bs_page_obj.findAll('a')
 
-    link_labs = [link['href'] for link in all_links if labs_regex.match(str(link.text))][0]
+    link_labs = [link['href'] for link in all_links if regex.labs_regex.match(str(link.text))][0]
 
     # print(link_labs)
 
@@ -65,10 +50,10 @@ if __name__ == '__main__':
     links_to_labs = container_labs.findAll('a')
 
     for link_lab in links_to_labs:
-        if url_regex.match(link_lab['href']):
+        if regex.url_regex.match(link_lab['href']):
             # print(url['href'])
             name_of_dir = link_lab.text
-            target_dir = create_director(path_to_create_dirs, name_of_dir)
+            target_dir = utils.create_director(path_to_create_dirs, name_of_dir)
 
             go_to_link_lab = requests.get(f"https://sites.google.com{link_lab['href']}")
             laborator = bs(go_to_link_lab.content, 'html.parser')
@@ -92,9 +77,8 @@ if __name__ == '__main__':
                         start_of_pb = 1
                         problems = []
                         for pb in list_of_problems:
-                            # print(pb.text)
-                            if re.match(r'[\s]*(\d{1,2}[\.|\)]{1}).', pb.text):
-                                # print("Cu nr:", pb.text)
+
+                            if regex.start_problem_pattern.match(pb.text):
                                 if start_of_pb == 1:
                                     problema += pb.text
                                 else:
@@ -103,12 +87,9 @@ if __name__ == '__main__':
                                     start_of_pb = 1
                                 start_of_pb = 0
                             else:
-                                # print("FARA NR", pb.text)
+
                                 problema += pb.text
 
-                        # list_of_problems = [pb for pb in list_of_problems
-                        #                     if len(str(pb.text)) and re.match(r'(\s*)(\d{1,2}[\.|\)]{1}).', pb.text) or
-                        #                     re.match(r'^(\s*)(Example|example|Ex)', pb.text)]
                         problems.append(problema)
                         list_of_problems = problems
 
@@ -118,10 +99,10 @@ if __name__ == '__main__':
                             text = problem
                         else:
                             text = problem.text
-                        #print(text)
+                        # print(text)
                         probably_name = detect_name_function(text)
 
-                        if  probably_name != -1:
+                        if probably_name != -1:
                             string_hardcoded = f"def {probably_name}(param): \n\tpass\n\n"
                             file_lab.write(string_hardcoded)
                         else:
