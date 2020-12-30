@@ -10,31 +10,34 @@ from bs4 import BeautifulSoup as bs
 import regexs_utils as regex
 import utils
 
+# List of stop words - they aren't allowed as a function name
+stop_words = ['len', 'max', 'min', 'str', 'ord', 'chr']
+
 
 # ---- ----
 
 def detect_name_function(text):
     pattern3 = False
-    nume_fct = regex.pattern_function_3.search(text)
+    detected_name = regex.pattern_function_3.search(text)
 
     name = ''
 
-    if nume_fct:
+    if detected_name:
         pattern3 = True
 
-    if nume_fct is None:
-        nume_fct = regex.pattern_function_1.search(text)
+    if detected_name is None:
+        detected_name = regex.pattern_function_1.search(text)
 
-    if nume_fct is None:
-        nume_fct = regex.pattern_function_2.search(text)
+    if detected_name is None:
+        detected_name = regex.pattern_function_2.search(text)
 
-    if nume_fct and pattern3 is False:
-        name = re.split('\s|\s\(|\(|[\s]function', nume_fct.group(0))[0]
+    if detected_name and pattern3 is False:
+        name = re.split('\s|\s\(|\(|[\s]function', detected_name.group(0))[0]
     else:
-        if nume_fct and pattern3:
-            name = nume_fct.group(2)
+        if detected_name and pattern3:
+            name = detected_name.group(2)
 
-    return name if name != '' else -1
+    return name if name != '' and name not in stop_words else -1
 
 
 paragraphs_pb = False
@@ -84,24 +87,24 @@ if __name__ == '__main__':
                         if paragraphs_pb is False:
                             list_of_problems = list_of_problems.findAll('li')
                         else:
-                            problema = ''
+                            problem = ''
                             start_of_pb = 1
                             problems = []
                             for pb in list_of_problems:
 
                                 if regex.start_problem_pattern.match(pb.text):
                                     if start_of_pb == 1:
-                                        problema += pb.text
+                                        problem += pb.text
                                     else:
-                                        problems.append(problema)
-                                        problema = pb.text
+                                        problems.append(problem)
+                                        problem = pb.text
                                         start_of_pb = 1
                                     start_of_pb = 0
                                 else:
 
-                                    problema += pb.text
+                                    problem += pb.text
 
-                            problems.append(problema)
+                            problems.append(problem)
                             list_of_problems = problems
 
                         nr_pb = 1
