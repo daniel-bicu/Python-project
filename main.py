@@ -12,37 +12,62 @@ import utils
 
 # List of stop words - they aren't allowed as a function name
 stop_words = ['len', 'max', 'min', 'str', 'ord', 'chr', 'content']
+opened_paranths = ['(', '[', '{']
+closed_paranths = [')', ']', '}']
 
 
 # ---- ----
 
-def detect_name_function(text):
+def count_params(text):
+    stack = []
+    nr_params = 1
+
+    for caracter in text:
+        if caracter == ',' and len(stack) == 0:
+            nr_params += 1
+        if caracter in opened_paranths:
+            stack.append(caracter)
+        if caracter in closed_paranths and len(stack) != 0:
+            stack.pop()
+        if caracter == ')' and len(stack) == 0:
+            return nr_params
+
+
+def get_function_details(text):
     pattern3 = False
     detected_name = regex.pattern_function_3.search(text)
 
     name = ''
+    nr_params = 1
 
     if detected_name:
         pattern3 = True
 
     if detected_name is None:
         detected_name = regex.pattern_function_1.search(text)
+        if detected_name:
+            poz_start_function = text.index(detected_name.group())
+            poz1 = text.find('(', poz_start_function)
+            #print(text[poz1 + 1:])
+            nr_params = count_params(text[poz1 + 1:])
+            #print(nr_params)
 
     if detected_name is None:
         detected_name = regex.pattern_function_2.search(text)
 
     if detected_name and pattern3 is False:
-        name = re.split('\s|\s\(|\(|[\s]function', detected_name.group(0))[0]
+        name = re.split(r'\s|\s\(|\(|[\s]function', detected_name.group(0))[0]
     else:
         if detected_name and pattern3:
             name = detected_name.group(2)
 
-    # if detected_name:
-    #     print(detected_name.group())
-    return name if name != '' and name not in stop_words else -1
+    if detected_name:
+        print(detected_name.group())
+    return (name, nr_params) if name != '' and name not in stop_words else (-1,1)
 
 
 paragraphs_pb = False
+nr_params = 1
 
 if __name__ == '__main__':
 
@@ -103,7 +128,6 @@ if __name__ == '__main__':
                                         start_of_pb = 1
                                     start_of_pb = 0
                                 else:
-
                                     problem += pb.text
                                     problem += '\n'
 
@@ -133,28 +157,30 @@ if __name__ == '__main__':
                                     else:
                                         sub_pb_text += sub_problem
                                 sb_pbs.append(sub_pb_text)
-                            #print("PB NOUA, ARE SUB?", sb_pbs)
+                            # print("PB NOUA, ARE SUB?", sb_pbs)
 
                             if len(sb_pbs) == 0:
                                 if paragraphs_pb:
                                     text = problem
                                 else:
                                     text = problem.text
-                                # print(text)
-                                probably_name = detect_name_function(text)
+                                print(text)
+                                (probably_name, nr_params) = get_function_details(text)
 
+                                print(probably_name, nr_params)
                                 if probably_name != -1:
-                                    utils.create_function_pb(probably_name, file_lab)
+                                    utils.create_function_pb(probably_name, nr_params, file_lab)
                                 else:
-                                    utils.create_function_pb(nr_pb, file_lab)
+                                    utils.create_function_pb(nr_pb, nr_params, file_lab)
                             else:
                                 nr_subpb = 1
                                 for subpb in sb_pbs:
-                                    probably_name = detect_name_function(subpb)
+                                    (probably_name, nr_params) = get_function_details(subpb)
+
                                     if probably_name != -1:
-                                        utils.create_function_subpb(nr_pb, probably_name, file_lab)
+                                        utils.create_function_subpb(nr_pb, probably_name, nr_params, file_lab)
                                     else:
-                                        utils.create_function_subpb(nr_pb,  nr_subpb, file_lab)
+                                        utils.create_function_subpb(nr_pb, nr_subpb, nr_params, file_lab)
                                     nr_subpb += 1
                             nr_pb += 1
             except:

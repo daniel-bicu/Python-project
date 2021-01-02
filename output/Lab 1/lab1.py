@@ -1,30 +1,30 @@
-def ex1(param): 
+def ex1(parametru1): 
 	pass
 
-def ex2(param): 
+def ex2(parametru1): 
 	pass
 
-def ex3(param): 
+def ex3(parametru1): 
 	pass
 
-def ex4(param): 
+def ex4(parametru1): 
 	pass
 
-def ex5(param): 
+def ex5(parametru1): 
 	pass
 
-def ex6(param): 
+def ex6(parametru1): 
 	pass
 
-def ex7(param): 
+def ex7(parametru1): 
 	pass
 
-def ex8(param): 
+def ex8(parametru1): 
 	pass
 
-def ex9(param): 
+def ex9(parametru1): 
 	pass
 
-def ex10(param): 
+def ex10(parametru1): 
 	pass
 

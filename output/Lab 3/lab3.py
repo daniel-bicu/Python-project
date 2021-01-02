@@ -1,27 +1,27 @@
-def ex1(param): 
+def ex1(parametru1): 
 	pass
 
-def ex2(param): 
+def ex2(parametru1): 
 	pass
 
-def ex3(param): 
+def ex3(parametru1): 
 	pass
 
-def build_xml_element(param): 
+def build_xml_element(parametru1): 
 	pass
 
-def validate_dict(param): 
+def validate_dict(parametru1): 
 	pass
 
-def ex6(param): 
+def ex6(parametru1): 
 	pass
 
-def ex7(param): 
+def ex7(parametru1): 
 	pass
 
-def loop(param): 
+def loop(parametru1): 
 	pass
 
-def my_function(param): 
+def my_function(*parametrii): 
 	pass
 
