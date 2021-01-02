@@ -22,6 +22,6 @@ def ex7(param):
 def ex8(param): 
 	pass
 
-def content(param): 
+def ex9(param): 
 	pass
 

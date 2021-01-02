@@ -11,7 +11,7 @@ import regexs_utils as regex
 import utils
 
 # List of stop words - they aren't allowed as a function name
-stop_words = ['len', 'max', 'min', 'str', 'ord', 'chr']
+stop_words = ['len', 'max', 'min', 'str', 'ord', 'chr', 'content']
 
 
 # ---- ----
@@ -37,6 +37,8 @@ def detect_name_function(text):
         if detected_name and pattern3:
             name = detected_name.group(2)
 
+    # if detected_name:
+    #     print(detected_name.group())
     return name if name != '' and name not in stop_words else -1
 
 
@@ -74,7 +76,7 @@ if __name__ == '__main__':
             laborator = bs(go_to_link_lab.content, 'html.parser')
 
             list_of_problems = laborator.find('ol')
-
+            # print(list_of_problems)
             if list_of_problems is None:
                 list_of_problems = laborator.findAll('p')
                 paragraphs_pb = True
@@ -91,10 +93,10 @@ if __name__ == '__main__':
                             start_of_pb = 1
                             problems = []
                             for pb in list_of_problems:
-
                                 if regex.start_problem_pattern.match(pb.text):
                                     if start_of_pb == 1:
                                         problem += pb.text
+                                        # problem += '\n'
                                     else:
                                         problems.append(problem)
                                         problem = pb.text
@@ -103,25 +105,57 @@ if __name__ == '__main__':
                                 else:
 
                                     problem += pb.text
+                                    problem += '\n'
 
                             problems.append(problem)
                             list_of_problems = problems
 
                         nr_pb = 1
                         for problem in list_of_problems:
-                            if paragraphs_pb:
-                                text = problem
-                            else:
-                                text = problem.text
-                            # print(text)
-                            probably_name = detect_name_function(text)
+                            sub_problem_points = []
+                            sb_pbs = []
 
-                            if probably_name != -1:
-                                string_hardcoded = f"def {probably_name}(param): \n\tpass\n\n"
-                                file_lab.write(string_hardcoded)
+                            if paragraphs_pb and regex.start_sub_problem_pattern.match(problem[2:]):
+                                sub_problem_points = problem[2:].split('\n')
+                                # print(sub_problems)
+                                start_sub_pb = True
+
+                                sub_pb_text = ''
+                                for sub_problem in sub_problem_points:
+                                    if regex.start_sub_problem_pattern.match(sub_problem):
+                                        if start_sub_pb:
+                                            sub_pb_text += sub_problem
+                                        else:
+                                            sb_pbs.append(sub_pb_text)
+                                            sub_pb_text = sub_problem
+                                            start_sub_pb = True
+                                        start_sub_pb = False
+                                    else:
+                                        sub_pb_text += sub_problem
+                                sb_pbs.append(sub_pb_text)
+                            #print("PB NOUA, ARE SUB?", sb_pbs)
+
+                            if len(sb_pbs) == 0:
+                                if paragraphs_pb:
+                                    text = problem
+                                else:
+                                    text = problem.text
+                                # print(text)
+                                probably_name = detect_name_function(text)
+
+                                if probably_name != -1:
+                                    utils.create_function_pb(probably_name, file_lab)
+                                else:
+                                    utils.create_function_pb(nr_pb, file_lab)
                             else:
-                                string_hardcoded = f"def ex{nr_pb}(param): \n\tpass\n\n"
-                                file_lab.write(string_hardcoded)
+                                nr_subpb = 1
+                                for subpb in sb_pbs:
+                                    probably_name = detect_name_function(subpb)
+                                    if probably_name != -1:
+                                        utils.create_function_subpb(nr_pb, probably_name, file_lab)
+                                    else:
+                                        utils.create_function_subpb(nr_pb,  nr_subpb, file_lab)
+                                    nr_subpb += 1
                             nr_pb += 1
             except:
                 print("Unable to create this file.\n")

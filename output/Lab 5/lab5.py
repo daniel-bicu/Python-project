@@ -1,4 +1,7 @@
-def process_item(param): 
+def ex1_process_item(param): 
+	pass
+
+def ex1_2(param): 
 	pass
 
 def my_function(param): 
@@ -19,7 +22,13 @@ def my_function(param):
 def process(param): 
 	pass
 
-def print_arguments(param): 
+def ex8_print_arguments(param): 
+	pass
+
+def ex8_multiply_output(param): 
+	pass
+
+def ex8_augment_function(param): 
 	pass
 
 def f9(param): 
