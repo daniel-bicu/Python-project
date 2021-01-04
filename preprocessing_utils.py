@@ -9,6 +9,12 @@ closed_paranths = [')', ']', '}']
 
 
 def search_problems(text):
+    """
+    Search problems through paragraphs (<p> tags). If there are more than one <p> for a problem, then concate to make a
+    single problem and add in the list.
+    :param text: target text to search in
+    :return: list of problems
+    """
     problem = ''
     start_of_pb = 1
     problems = []
@@ -31,6 +37,12 @@ def search_problems(text):
 
 
 def search_sub_problems(paragraphs_pb, problem):
+    """
+    By "sub problems" I mean: sub lists like: 1 a. b. c. etc.
+    :param paragraphs_pb: type of problem (if it was extracted from a <p> tag or not.)
+    :param problem: text of the problem
+    :return: a list of subproblems
+    """
     sb_pbs = []
     sub_problem_points = []
     if paragraphs_pb and regex.start_sub_problem_pattern.match(problem[2:]):
@@ -55,6 +67,11 @@ def search_sub_problems(paragraphs_pb, problem):
 
 
 def get_list_of_params(nr_params):
+    """
+    From the number of params make a good way to visualise and put params in a function definition.
+    :param nr_params: nr of params
+    :return: string in python style to define params of a function
+    """
     list_of_params = []
     if nr_params >= 4:
         return "*parametrii"
@@ -68,6 +85,11 @@ def get_list_of_params(nr_params):
 
 
 def count_params(text):
+    """
+    Retrieve number of params based on the header of a function.
+    :param text: header of the function
+    :return:
+    """
     stack = []
     nr_params = 1
 
@@ -83,6 +105,11 @@ def count_params(text):
 
 
 def get_function_details(text):
+    """
+    Retrieve the name & params of a function from text
+    :param text: target text to search in
+    :return: (name,nr_params) = name and the number of params of a function
+    """
     pattern3 = False
     detected_name = regex.pattern_function_3.search(text)
 
