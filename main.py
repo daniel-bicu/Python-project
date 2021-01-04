@@ -8,63 +8,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 import regexs_utils as regex
-import utils
-
-# List of stop words - they aren't allowed as a function name
-stop_words = ['len', 'max', 'min', 'str', 'ord', 'chr', 'content']
-opened_paranths = ['(', '[', '{']
-closed_paranths = [')', ']', '}']
-
-
-# ---- ----
-
-def count_params(text):
-    stack = []
-    nr_params = 1
-
-    for caracter in text:
-        if caracter == ',' and len(stack) == 0:
-            nr_params += 1
-        if caracter in opened_paranths:
-            stack.append(caracter)
-        if caracter in closed_paranths and len(stack) != 0:
-            stack.pop()
-        if caracter == ')' and len(stack) == 0:
-            return nr_params
-
-
-def get_function_details(text):
-    pattern3 = False
-    detected_name = regex.pattern_function_3.search(text)
-
-    name = ''
-    nr_params = 1
-
-    if detected_name:
-        pattern3 = True
-
-    if detected_name is None:
-        detected_name = regex.pattern_function_1.search(text)
-        if detected_name:
-            poz_start_function = text.index(detected_name.group())
-            poz1 = text.find('(', poz_start_function)
-            #print(text[poz1 + 1:])
-            nr_params = count_params(text[poz1 + 1:])
-            #print(nr_params)
-
-    if detected_name is None:
-        detected_name = regex.pattern_function_2.search(text)
-
-    if detected_name and pattern3 is False:
-        name = re.split(r'\s|\s\(|\(|[\s]function', detected_name.group(0))[0]
-    else:
-        if detected_name and pattern3:
-            name = detected_name.group(2)
-
-    if detected_name:
-        print(detected_name.group())
-    return (name, nr_params) if name != '' and name not in stop_words else (-1,1)
-
+import file_utils
+import preprocessing_utils as information_manager
 
 paragraphs_pb = False
 nr_params = 1
@@ -90,12 +35,13 @@ if __name__ == '__main__':
 
     container_labs = labs_page.find('div', attrs={'class': "tyJCtd mGzaTb baZpAe"})
     links_to_labs = container_labs.findAll('a')
+    # print(links_to_labs)
 
     for link_lab in links_to_labs:
         if regex.url_regex.match(link_lab['href']):
             # print(url['href'])
             name_of_dir = link_lab.text
-            target_dir = utils.create_director(path_to_create_dirs, name_of_dir)
+            target_dir = file_utils.create_director(path_to_create_dirs, name_of_dir)
 
             go_to_link_lab = requests.get(f"https://sites.google.com{link_lab['href']}")
             laborator = bs(go_to_link_lab.content, 'html.parser')
@@ -114,73 +60,38 @@ if __name__ == '__main__':
                         if paragraphs_pb is False:
                             list_of_problems = list_of_problems.findAll('li')
                         else:
-                            problem = ''
-                            start_of_pb = 1
-                            problems = []
-                            for pb in list_of_problems:
-                                if regex.start_problem_pattern.match(pb.text):
-                                    if start_of_pb == 1:
-                                        problem += pb.text
-                                        # problem += '\n'
-                                    else:
-                                        problems.append(problem)
-                                        problem = pb.text
-                                        start_of_pb = 1
-                                    start_of_pb = 0
-                                else:
-                                    problem += pb.text
-                                    problem += '\n'
+                            list_of_problems = information_manager.search_problems(list_of_problems)
 
-                            problems.append(problem)
-                            list_of_problems = problems
-
+                        # print("Lab", target_dir)
+                        # print(list_of_problems)
+                        # print("-"*10)
                         nr_pb = 1
                         for problem in list_of_problems:
-                            sub_problem_points = []
-                            sb_pbs = []
-
-                            if paragraphs_pb and regex.start_sub_problem_pattern.match(problem[2:]):
-                                sub_problem_points = problem[2:].split('\n')
-                                # print(sub_problems)
-                                start_sub_pb = True
-
-                                sub_pb_text = ''
-                                for sub_problem in sub_problem_points:
-                                    if regex.start_sub_problem_pattern.match(sub_problem):
-                                        if start_sub_pb:
-                                            sub_pb_text += sub_problem
-                                        else:
-                                            sb_pbs.append(sub_pb_text)
-                                            sub_pb_text = sub_problem
-                                            start_sub_pb = True
-                                        start_sub_pb = False
-                                    else:
-                                        sub_pb_text += sub_problem
-                                sb_pbs.append(sub_pb_text)
-                            # print("PB NOUA, ARE SUB?", sb_pbs)
-
+                            sb_pbs = information_manager.search_sub_problems(paragraphs_pb, problem)
+                            # print("AM SUBPB?", sb_pbs)
                             if len(sb_pbs) == 0:
                                 if paragraphs_pb:
                                     text = problem
                                 else:
-                                    text = problem.text
-                                print(text)
-                                (probably_name, nr_params) = get_function_details(text)
+                                    text = problem.text  # scot dintr-un li acel text <li...> text ... < /li>
 
-                                print(probably_name, nr_params)
+                                (probably_name, nr_params) = information_manager.get_function_details(text)
+
+                                params = information_manager.get_list_of_params(nr_params)
+
                                 if probably_name != -1:
-                                    utils.create_function_pb(probably_name, nr_params, file_lab)
+                                    file_utils.create_function_pb(probably_name, params, file_lab)
                                 else:
-                                    utils.create_function_pb(nr_pb, nr_params, file_lab)
+                                    file_utils.create_function_pb(nr_pb, params, file_lab)
                             else:
                                 nr_subpb = 1
                                 for subpb in sb_pbs:
-                                    (probably_name, nr_params) = get_function_details(subpb)
+                                    (probably_name, nr_params) = information_manager.get_function_details(subpb)
 
                                     if probably_name != -1:
-                                        utils.create_function_subpb(nr_pb, probably_name, nr_params, file_lab)
+                                        file_utils.create_function_subpb(nr_pb, probably_name, params, file_lab)
                                     else:
-                                        utils.create_function_subpb(nr_pb, nr_subpb, nr_params, file_lab)
+                                        file_utils.create_function_subpb(nr_pb, nr_subpb, params, file_lab)
                                     nr_subpb += 1
                             nr_pb += 1
             except:
